@@ -1,35 +1,56 @@
 import numpy as np
-import pandas as pd
+rng = np.random
 import tensorflow as tf
 import sklearn
 
-import seaborn as sns
+# disable warnings
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 
+'''get data'''
 # load dataset from sklearn
 from sklearn.datasets import load_boston
 boston = load_boston()
 
-def normalize(data):
-    mu = np.mean(data, axis=0)
-    sigma = np.std(data, axis=0)
-    return (data - mu)/sigma
+# load features and labels
+features = np.array(boston.data) # shape = [506, 13]
+features = features.tolist()
 
-if __name__ == '__main__':
+labels = np.array(boston.target) # shape = [506]
+labels = np.transpose([labels])
 
-    # load features and labels
-    features = np.array(boston.data)
-    labels = np.array(boston.target)
+'''build model'''
+num_samples = len(features[0])
+num_features = len(features[1])
+num_labels = num_samples
 
-    # normalize features
-    features = normalize(features)
+# define model constituents
+x = tf.placeholder(tf.float32,[None, num_features])
+W = tf.Variable(tf.zeros([num_features, 1]))
+b = tf.Variable(tf.zeros([1]))
+product = tf.matmul(x, W)
+y = product + b
+y_ = tf.placeholder(tf.float32, [None, 1])
 
-    # split into training and testing (80/20 split)
-    features_train = features[:int(len(features)*0.8)]
-    features_test = features[len(features_train):]
+# define cost function
+cost = tf.reduce_mean(tf.square(y_-y))
 
-    labels_train = labels[:int(len(labels)*0.8)]
-    labels_test = labels[len(labels_train):]
+# define train step
+train_step = tf.train.GradientDescentOptimizer(0.001).minimize(cost)
 
-# leave off for now
+'''train model'''
+sess = tf.Session()
+init = tf.global_variables_initializer()
+sess.run(init)
+steps = 1000
+
+for i in range(steps):
+    feed = {x: features, y_: labels}
+    sess.run(train_step, feed_dict=feed)
+    print("After %d iteration:" % i)
+    print("W: %s" % sess.run(W))
+    print("b: %f" % sess.run(b))
+    print("cost: %f" % sess.run(cost, feed_dict=feed))
+
 
 
