@@ -42,7 +42,7 @@ y_ = tf.placeholder(tf.float32, [None, 1])
 cost = tf.reduce_mean(tf.square(y_-y))
 
 # gradient descent
-train_step = tf.train.GradientDescentOptimizer(0.0001).minimize(cost)
+train_step = tf.train.GradientDescentOptimizer(0.001).minimize(cost)
 
 '''train model'''
 sess = tf.Session()
